@@ -162,24 +162,24 @@ const BenefitRulesChecker = () => {
                     />
                   </div>
                   
-                  <Select value={filters.package} onValueChange={(value) => setFilters(prev => ({ ...prev, package: value }))}>
+                  <Select value={filters.package || "all"} onValueChange={(value) => setFilters(prev => ({ ...prev, package: value === "all" ? "" : value }))}>
                     <SelectTrigger className="w-[200px]">
                       <SelectValue placeholder="Filter by Package" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Packages</SelectItem>
+                      <SelectItem value="all">All Packages</SelectItem>
                       {uniquePackages.map(pkg => (
                         <SelectItem key={pkg} value={pkg}>{pkg}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   
-                  <Select value={filters.contradictionFlag} onValueChange={(value) => setFilters(prev => ({ ...prev, contradictionFlag: value }))}>
+                  <Select value={filters.contradictionFlag || "all"} onValueChange={(value) => setFilters(prev => ({ ...prev, contradictionFlag: value === "all" ? "" : value }))}>
                     <SelectTrigger className="w-[200px]">
                       <SelectValue placeholder="Contradiction Flag" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All</SelectItem>
+                      <SelectItem value="all">All</SelectItem>
                       <SelectItem value="yes">Has Contradictions</SelectItem>
                       <SelectItem value="no">No Contradictions</SelectItem>
                     </SelectContent>
