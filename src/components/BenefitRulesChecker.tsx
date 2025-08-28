@@ -6,9 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Download, Search, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { Download, Search, AlertTriangle, CheckCircle, XCircle, Eye, FileText } from "lucide-react";
 import { benefitRules, contradictions, diseaseMappings } from "@/data/benefitRulesData";
-import { FilterState } from "@/types/benefitRules";
+import { FilterState, BenefitRule, UserComment, Task } from "@/types/benefitRules";
+import ContradictionDrilldown from "./ContradictionDrilldown";
+import DiseaseCoverageHeatmap from "./DiseaseCoverageHeatmap";
+import UserFeedbackPanel from "./UserFeedbackPanel";
+import RuleCompletenessCard from "./RuleCompletenessCard";
+import { useToast } from "@/hooks/use-toast";
 
 const BenefitRulesChecker = () => {
   const [filters, setFilters] = useState<FilterState>({
@@ -17,6 +22,11 @@ const BenefitRulesChecker = () => {
     contradictionFlag: "",
     search: ""
   });
+  
+  const [selectedContradiction, setSelectedContradiction] = useState<any>(null);
+  const [isDrilldownOpen, setIsDrilldownOpen] = useState(false);
+  const [rulesData, setRulesData] = useState<BenefitRule[]>(benefitRules);
+  const { toast } = useToast();
 
   // Summary calculations
   const summary = useMemo(() => {
@@ -35,7 +45,7 @@ const BenefitRulesChecker = () => {
 
   // Filtered rules
   const filteredRules = useMemo(() => {
-    return benefitRules.filter(rule => {
+    return rulesData.filter(rule => {
       const matchesService = !filters.service || rule.service.toLowerCase().includes(filters.service.toLowerCase());
       const matchesPackage = !filters.package || rule.package === filters.package;
       const matchesContradiction = !filters.contradictionFlag || 
@@ -43,22 +53,66 @@ const BenefitRulesChecker = () => {
         (filters.contradictionFlag === "no" && !rule.contradictionFlag);
       const matchesSearch = !filters.search || 
         Object.values(rule).some(value => 
-          value.toString().toLowerCase().includes(filters.search.toLowerCase())
+          value && value.toString().toLowerCase().includes(filters.search.toLowerCase())
         );
       
       return matchesService && matchesPackage && matchesContradiction && matchesSearch;
     });
-  }, [filters]);
+  }, [filters, rulesData]);
 
   // Unique packages for filter
   const uniquePackages = useMemo(() => {
-    return Array.from(new Set(benefitRules.map(rule => rule.package)));
-  }, []);
+    return Array.from(new Set(rulesData.map(rule => rule.package)));
+  }, [rulesData]);
 
   // Unmapped diseases
   const unmappedDiseases = useMemo(() => {
     return diseaseMappings.filter(d => !d.isMapped);
   }, []);
+
+  // User feedback handlers
+  const handleAddComment = (ruleId: string, comment: Omit<UserComment, 'id'>) => {
+    const updatedRules = rulesData.map(rule => {
+      if (rule.id === ruleId) {
+        const newComment = { ...comment, id: Date.now().toString() };
+        return { 
+          ...rule, 
+          userComments: [...(rule.userComments || []), newComment] 
+        };
+      }
+      return rule;
+    });
+    setRulesData(updatedRules);
+  };
+
+  const handleAddTask = (ruleId: string, task: Omit<Task, 'id'>) => {
+    const updatedRules = rulesData.map(rule => {
+      if (rule.id === ruleId) {
+        const newTask = { ...task, id: Date.now().toString() };
+        return { 
+          ...rule, 
+          assignedTasks: [...(rule.assignedTasks || []), newTask] 
+        };
+      }
+      return rule;
+    });
+    setRulesData(updatedRules);
+  };
+
+  const handleFlagIncorrect = (ruleId: string) => {
+    const updatedRules = rulesData.map(rule => {
+      if (rule.id === ruleId) {
+        return { ...rule, flaggedIncorrect: !rule.flaggedIncorrect };
+      }
+      return rule;
+    });
+    setRulesData(updatedRules);
+  };
+
+  const handleContradictionClick = (contradiction: any) => {
+    setSelectedContradiction(contradiction);
+    setIsDrilldownOpen(true);
+  };
 
   const downloadCSV = (data: any[], filename: string) => {
     const csvContent = [
@@ -105,8 +159,13 @@ const BenefitRulesChecker = () => {
               <AlertTriangle className="h-4 w-4 text-destructive" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-destructive">{summary.contradictions}</div>
-              <p className="text-xs text-muted-foreground">Rules flagged</p>
+              <div 
+                className="text-2xl font-bold text-destructive cursor-pointer hover:underline"
+                onClick={() => handleContradictionClick(contradictions[0])}
+              >
+                {summary.contradictions}
+              </div>
+              <p className="text-xs text-muted-foreground">Click to view details</p>
             </CardContent>
           </Card>
           
@@ -133,12 +192,17 @@ const BenefitRulesChecker = () => {
           </Card>
         </div>
 
+        {/* Rule Completeness Card */}
+        <RuleCompletenessCard />
+
         {/* Main Content Tabs */}
         <Tabs defaultValue="rules" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="rules">Parsed Rules</TabsTrigger>
             <TabsTrigger value="contradictions">Contradictions</TabsTrigger>
             <TabsTrigger value="mapping">Disease Coverage</TabsTrigger>
+            <TabsTrigger value="heatmap">Coverage Matrix</TabsTrigger>
+            <TabsTrigger value="tasks">Tasks</TabsTrigger>
             <TabsTrigger value="unmapped">Unmapped Items</TabsTrigger>
           </TabsList>
 
@@ -205,26 +269,46 @@ const BenefitRulesChecker = () => {
                         <TableHead>Facility Level</TableHead>
                         <TableHead>Tariff</TableHead>
                         <TableHead>Coverage Condition</TableHead>
+                        <TableHead>Source</TableHead>
                         <TableHead>Contradiction</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredRules.map((rule) => (
                         <TableRow 
                           key={rule.id}
-                          className={rule.contradictionFlag ? "bg-destructive/10" : ""}
+                          className={rule.contradictionFlag ? "bg-destructive/10" : rule.flaggedIncorrect ? "bg-yellow-50" : ""}
                         >
                           <TableCell className="font-medium">{rule.service}</TableCell>
                           <TableCell>{rule.package}</TableCell>
                           <TableCell>{rule.facilityLevel}</TableCell>
                           <TableCell>{rule.tariff}</TableCell>
                           <TableCell className="max-w-xs truncate">{rule.coverageCondition}</TableCell>
+                          <TableCell className="text-xs">
+                            {rule.sourceDocument ? (
+                              <div>
+                                <div className="font-medium">{rule.sourceDocument}</div>
+                                <div className="text-muted-foreground">Page {rule.sourcePage}</div>
+                              </div>
+                            ) : (
+                              <Badge variant="outline">No source</Badge>
+                            )}
+                          </TableCell>
                           <TableCell>
                             {rule.contradictionFlag ? (
                               <Badge variant="destructive">Yes</Badge>
                             ) : (
                               <Badge variant="secondary">No</Badge>
                             )}
+                          </TableCell>
+                          <TableCell>
+                            <UserFeedbackPanel
+                              rule={rule}
+                              onAddComment={handleAddComment}
+                              onAddTask={handleAddTask}
+                              onFlagIncorrect={handleFlagIncorrect}
+                            />
                           </TableCell>
                         </TableRow>
                       ))}
@@ -263,6 +347,7 @@ const BenefitRulesChecker = () => {
                         <TableHead>Rule A</TableHead>
                         <TableHead>Rule B</TableHead>
                         <TableHead>Reason</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -272,6 +357,16 @@ const BenefitRulesChecker = () => {
                           <TableCell>{contradiction.rowALevels}</TableCell>
                           <TableCell>{contradiction.rowBLevels}</TableCell>
                           <TableCell>{contradiction.reason}</TableCell>
+                          <TableCell>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleContradictionClick(contradiction)}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View Details
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -320,6 +415,65 @@ const BenefitRulesChecker = () => {
             </Card>
           </TabsContent>
 
+          {/* Disease Coverage Heatmap */}
+          <TabsContent value="heatmap">
+            <DiseaseCoverageHeatmap />
+          </TabsContent>
+
+          {/* Tasks Tab */}
+          <TabsContent value="tasks">
+            <Card>
+              <CardHeader>
+                <CardTitle>Assigned Tasks</CardTitle>
+                <CardDescription>
+                  Tasks created for rule reviews and corrections
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {rulesData
+                    .filter(rule => rule.assignedTasks && rule.assignedTasks.length > 0)
+                    .map(rule => (
+                      <div key={rule.id} className="border rounded-lg p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <h4 className="font-medium">{rule.service}</h4>
+                          <Badge variant="outline">{rule.package}</Badge>
+                        </div>
+                        <div className="space-y-2">
+                          {rule.assignedTasks?.map(task => (
+                            <div key={task.id} className="bg-muted p-3 rounded">
+                              <div className="flex justify-between items-start mb-1">
+                                <span className="font-medium text-sm">{task.title}</span>
+                                <Badge 
+                                  variant={
+                                    task.priority === 'critical' ? 'destructive' :
+                                    task.priority === 'high' ? 'destructive' :
+                                    task.priority === 'medium' ? 'default' : 'secondary'
+                                  }
+                                >
+                                  {task.priority}
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground mb-2">{task.description}</p>
+                              <div className="flex justify-between text-xs">
+                                <span>Assigned to: {task.assignedTeam}</span>
+                                <span>Status: {task.status}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  {rulesData.every(rule => !rule.assignedTasks || rule.assignedTasks.length === 0) && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No tasks assigned yet. Create tasks from the Parsed Rules tab.
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Unmapped Diseases */}
           <TabsContent value="unmapped">
             <Card>
@@ -349,6 +503,13 @@ const BenefitRulesChecker = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Drill-down Modal */}
+        <ContradictionDrilldown
+          contradiction={selectedContradiction}
+          isOpen={isDrilldownOpen}
+          onClose={() => setIsDrilldownOpen(false)}
+        />
       </div>
     </div>
   );

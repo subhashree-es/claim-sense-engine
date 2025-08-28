@@ -10,6 +10,33 @@ export interface BenefitRule {
   accessRules: string;
   contradictionFlag: boolean;
   contradictionReason?: string;
+  sourceDocument?: string;
+  sourcePage?: string;
+  userComments?: UserComment[];
+  flaggedIncorrect?: boolean;
+  assignedTasks?: Task[];
+}
+
+export interface UserComment {
+  id: string;
+  userId: string;
+  userName: string;
+  comment: string;
+  timestamp: Date;
+  type: 'feedback' | 'correction' | 'clarification';
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  description: string;
+  assignedTo: string;
+  assignedTeam: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: 'pending' | 'in-progress' | 'completed' | 'cancelled';
+  createdAt: Date;
+  dueDate?: Date;
+  ruleId: string;
 }
 
 export interface Contradiction {
@@ -31,6 +58,18 @@ export interface Summary {
   contradictions: number;
   diseasesMapped: number;
   diseasesUnmapped: number;
+  completeness: RuleCompleteness;
+}
+
+export interface RuleCompleteness {
+  withTariffs: number;
+  withLimits: number;
+  withExclusions: number;
+  withSourceCitation: number;
+  missingTariffs: number;
+  missingLimits: number;
+  missingExclusions: number;
+  missingSourceCitation: number;
 }
 
 export interface FilterState {

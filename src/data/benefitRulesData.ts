@@ -13,7 +13,12 @@ export const benefitRules: BenefitRule[] = [
     coverageCondition: "Each facility will be mapped to a Primary Care Network",
     exclusion: "",
     accessRules: "All registered households will be mapped to a PCN. The Global budget shall be allocated based on the population in the PCN.",
-    contradictionFlag: false
+    contradictionFlag: false,
+    sourceDocument: "SHA Benefits Package 2024",
+    sourcePage: "15",
+    userComments: [],
+    flaggedIncorrect: false,
+    assignedTasks: []
   },
   {
     id: "PHF-002",
@@ -25,7 +30,12 @@ export const benefitRules: BenefitRule[] = [
     coverageCondition: "Primary Care Network allocation",
     exclusion: "",
     accessRules: "Distribution of the Funds shall be done at the end of the quarter based on patient visits, weighted by disease treated.",
-    contradictionFlag: false
+    contradictionFlag: false,
+    sourceDocument: "SHA Benefits Package 2024",
+    sourcePage: "16",
+    userComments: [],
+    flaggedIncorrect: false,
+    assignedTasks: []
   },
   {
     id: "PHF-003",
@@ -113,7 +123,12 @@ export const benefitRules: BenefitRule[] = [
     exclusion: "",
     accessRules: "ARVs, antimalarials, anti TBs, and associated tests, family planning commodities, KEPI vaccines will be provided at public facilities, and faith based & private facilities that report to the health information system.",
     contradictionFlag: true,
-    contradictionReason: "Different tariff structure compared to PHF for same service"
+    contradictionReason: "Different tariff structure compared to PHF for same service",
+    sourceDocument: "SHA Benefits Package 2024",
+    sourcePage: "89",
+    userComments: [],
+    flaggedIncorrect: false,
+    assignedTasks: []
   },
   // Medical Inpatient Services
   {
