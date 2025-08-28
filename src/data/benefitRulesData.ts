@@ -152,10 +152,11 @@ export const benefitRules: BenefitRule[] = [
     facilityLevel: "Level 2-3",
     tariff: "KES. 935 for Consultation and dispensing of eyeglasses",
     coverageCondition: "Limit: KES. 1,000 per Household. Pre-authorized service. Limited to beneficiaries below 18 years.",
-    exclusion: "Replacement of eyeglasses only after every two years if indicated.",
+    exclusion: "eyeglasses only after every two years if indicated.",
     accessRules: "Limit: KES. 1,000 per Household. Pre-authorized service. Limited to beneficiaries below 18 years.",
     contradictionFlag: false
-  }
+  },
+
 ];
 
 // Detected contradictions in the benefit rules
