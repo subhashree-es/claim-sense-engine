@@ -13,6 +13,8 @@ import ContradictionDrilldown from "./ContradictionDrilldown";
 import DiseaseCoverageHeatmap from "./DiseaseCoverageHeatmap";
 import UserFeedbackPanel from "./UserFeedbackPanel";
 import RuleCompletenessCard from "./RuleCompletenessCard";
+import ConfusionMatrix from "./ConfusionMatrix";
+import ContradictionsList from "./ContradictionsList";
 import { useToast } from "@/hooks/use-toast";
 
 const BenefitRulesChecker = () => {
@@ -197,11 +199,12 @@ const BenefitRulesChecker = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="rules" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="rules">Parsed Rules</TabsTrigger>
             <TabsTrigger value="contradictions">Contradictions</TabsTrigger>
             <TabsTrigger value="mapping">Disease Coverage</TabsTrigger>
             <TabsTrigger value="heatmap">Coverage Matrix</TabsTrigger>
+            <TabsTrigger value="confusion">Confusion Matrix</TabsTrigger>
             <TabsTrigger value="tasks">Tasks</TabsTrigger>
             <TabsTrigger value="unmapped">Unmapped Items</TabsTrigger>
           </TabsList>
@@ -319,14 +322,14 @@ const BenefitRulesChecker = () => {
             </Card>
           </TabsContent>
 
-          {/* Contradictions Panel */}
+          {/* Enhanced Contradictions Panel */}
           <TabsContent value="contradictions">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle>Detected Contradictions</CardTitle>
                   <CardDescription>
-                    Rules that conflict with each other or contain inconsistencies
+                    Detailed side-by-side comparison of conflicting rules
                   </CardDescription>
                 </div>
                 <Button 
@@ -339,39 +342,7 @@ const BenefitRulesChecker = () => {
               </CardHeader>
               
               <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Service</TableHead>
-                        <TableHead>Rule A</TableHead>
-                        <TableHead>Rule B</TableHead>
-                        <TableHead>Reason</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {contradictions.map((contradiction) => (
-                        <TableRow key={contradiction.id}>
-                          <TableCell className="font-medium">{contradiction.service}</TableCell>
-                          <TableCell>{contradiction.rowALevels}</TableCell>
-                          <TableCell>{contradiction.rowBLevels}</TableCell>
-                          <TableCell>{contradiction.reason}</TableCell>
-                          <TableCell>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleContradictionClick(contradiction)}
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              View Details
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                <ContradictionsList onContradictionClick={handleContradictionClick} />
               </CardContent>
             </Card>
           </TabsContent>
@@ -472,6 +443,11 @@ const BenefitRulesChecker = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Confusion Matrix Tab */}
+          <TabsContent value="confusion">
+            <ConfusionMatrix />
           </TabsContent>
 
           {/* Unmapped Diseases */}
