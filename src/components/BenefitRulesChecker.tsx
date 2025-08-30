@@ -15,6 +15,9 @@ import UserFeedbackPanel from "./UserFeedbackPanel";
 import RuleCompletenessCard from "./RuleCompletenessCard";
 import ConfusionMatrix from "./ConfusionMatrix";
 import ContradictionsList from "./ContradictionsList";
+import PolicyRiskIndicators from "./PolicyRiskIndicators";
+import UserRolePerspectives from "./UserRolePerspectives";
+import VersionComparisonCard from "./VersionComparisonCard";
 import { useToast } from "@/hooks/use-toast";
 
 const BenefitRulesChecker = () => {
@@ -194,19 +197,29 @@ const BenefitRulesChecker = () => {
           </Card>
         </div>
 
-        {/* Rule Completeness Card */}
-        <RuleCompletenessCard />
+        {/* Enhanced Analysis Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <RuleCompletenessCard />
+          <PolicyRiskIndicators />
+        </div>
+
+        {/* Version Comparison & User Perspectives */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <VersionComparisonCard />
+          <UserRolePerspectives />
+        </div>
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="rules" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="rules">Parsed Rules</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
+            <TabsTrigger value="rules">Rules</TabsTrigger>
             <TabsTrigger value="contradictions">Contradictions</TabsTrigger>
             <TabsTrigger value="mapping">Disease Coverage</TabsTrigger>
             <TabsTrigger value="heatmap">Coverage Matrix</TabsTrigger>
             <TabsTrigger value="confusion">Confusion Matrix</TabsTrigger>
             <TabsTrigger value="tasks">Tasks</TabsTrigger>
-            <TabsTrigger value="unmapped">Unmapped Items</TabsTrigger>
+            <TabsTrigger value="unmapped">Unmapped</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
           {/* Parsed Rules Table */}
@@ -477,6 +490,15 @@ const BenefitRulesChecker = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Advanced Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-6">
+            <div className="grid grid-cols-1 gap-6">
+              <PolicyRiskIndicators />
+              <UserRolePerspectives />
+              <VersionComparisonCard />
+            </div>
           </TabsContent>
         </Tabs>
 
