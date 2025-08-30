@@ -17,7 +17,7 @@ import ConfusionMatrix from "./ConfusionMatrix";
 import ContradictionsList from "./ContradictionsList";
 import PolicyRiskIndicators from "./PolicyRiskIndicators";
 import UserRolePerspectives from "./UserRolePerspectives";
-import VersionComparisonCard from "./VersionComparisonCard";
+
 import { useToast } from "@/hooks/use-toast";
 
 const BenefitRulesChecker = () => {
@@ -203,11 +203,8 @@ const BenefitRulesChecker = () => {
           <PolicyRiskIndicators />
         </div>
 
-        {/* Version Comparison & User Perspectives */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <VersionComparisonCard />
-          <UserRolePerspectives />
-        </div>
+        {/* User Perspectives */}
+        <UserRolePerspectives />
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="rules" className="space-y-4">
@@ -497,7 +494,6 @@ const BenefitRulesChecker = () => {
             <div className="grid grid-cols-1 gap-6">
               <PolicyRiskIndicators />
               <UserRolePerspectives />
-              <VersionComparisonCard />
             </div>
           </TabsContent>
         </Tabs>
