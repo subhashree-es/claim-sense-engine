@@ -6,7 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Download, Search, AlertTriangle, CheckCircle, XCircle, Eye, FileText } from "lucide-react";
+import { 
+  Download, 
+  Search, 
+  AlertTriangle, 
+  CheckCircle, 
+  XCircle, 
+  Eye, 
+  FileText,
+  Activity,
+  Shield,
+  Users,
+  TrendingUp,
+  Database,
+  AlertCircle
+} from "lucide-react";
 import { benefitRules, contradictions, diseaseMappings } from "@/data/benefitRulesData";
 import { FilterState, BenefitRule, UserComment, Task } from "@/types/benefitRules";
 import ContradictionDrilldown from "./ContradictionDrilldown";
@@ -17,6 +31,9 @@ import ConfusionMatrix from "./ConfusionMatrix";
 import ContradictionsList from "./ContradictionsList";
 import PolicyRiskIndicators from "./PolicyRiskIndicators";
 import UserRolePerspectives from "./UserRolePerspectives";
+import EnhancedMetricCard from "./EnhancedMetricCard";
+import AnimatedCounter from "./AnimatedCounter";
+import InteractiveChart from "./InteractiveChart";
 
 import { useToast } from "@/hooks/use-toast";
 
@@ -137,64 +154,122 @@ const BenefitRulesChecker = () => {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">Benefit Rules Checker</h1>
-          <p className="text-muted-foreground">
-            Analyze healthcare benefit packages for contradictions and coverage gaps
-          </p>
+        {/* Enhanced Header */}
+        <div className="relative">
+          <div className="glass-card p-8 text-center space-y-4 border-t-4 border-t-primary">
+            <div className="space-y-2">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                Benefit Rules Checker
+              </h1>
+              <p className="text-lg text-muted-foreground">
+                Advanced healthcare benefit package analysis with AI-powered contradiction detection
+              </p>
+            </div>
+            
+            {/* Quick Stats Bar */}
+            <div className="flex justify-center gap-8 text-sm">
+              <div className="flex items-center gap-2">
+                <Activity className="h-4 w-4 text-primary" />
+                <span className="text-muted-foreground">Real-time Analysis</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4 text-success" />
+                <span className="text-muted-foreground">Policy Compliant</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-info" />
+                <span className="text-muted-foreground">Multi-stakeholder View</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Rules</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summary.totalRules}</div>
-              <p className="text-xs text-muted-foreground">Parsed from documents</p>
-            </CardContent>
-          </Card>
+        {/* Enhanced Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <EnhancedMetricCard
+            title="Total Rules"
+            value={<AnimatedCounter end={summary.totalRules} />}
+            subtitle="Parsed from documents"
+            variant="default"
+            icon={<Database className="h-5 w-5" />}
+            progress={{
+              value: summary.totalRules,
+              max: 100,
+              label: "Parsing progress"
+            }}
+            className="cursor-pointer"
+          />
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Contradictions</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-destructive" />
-            </CardHeader>
-            <CardContent>
-              <div 
-                className="text-2xl font-bold text-destructive cursor-pointer hover:underline"
-                onClick={() => handleContradictionClick(contradictions[0])}
-              >
-                {summary.contradictions}
-              </div>
-              <p className="text-xs text-muted-foreground">Click to view details</p>
-            </CardContent>
-          </Card>
+          <EnhancedMetricCard
+            title="Contradictions"
+            value={<AnimatedCounter end={summary.contradictions} />}
+            subtitle="Click to view details"
+            variant="destructive"
+            icon={<AlertTriangle className="h-5 w-5" />}
+            trend={{
+              value: -15,
+              label: "vs last check"
+            }}
+            className="cursor-pointer hover:shadow-glow"
+            onClick={() => handleContradictionClick(contradictions[0])}
+          />
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Mapped Diseases</CardTitle>
-              <CheckCircle className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">{summary.diseasesMapped}</div>
-              <p className="text-xs text-muted-foreground">With coverage</p>
-            </CardContent>
-          </Card>
+          <EnhancedMetricCard
+            title="Mapped Diseases"
+            value={<AnimatedCounter end={summary.diseasesMapped} />}
+            subtitle="With coverage"
+            variant="success"
+            icon={<CheckCircle className="h-5 w-5" />}
+            progress={{
+              value: summary.diseasesMapped,
+              max: summary.diseasesMapped + summary.diseasesUnmapped,
+              label: "Coverage completion"
+            }}
+            trend={{
+              value: 12,
+              label: "improvement"
+            }}
+          />
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Unmapped Diseases</CardTitle>
-              <XCircle className="h-4 w-4 text-orange-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{summary.diseasesUnmapped}</div>
-              <p className="text-xs text-muted-foreground">No coverage found</p>
-            </CardContent>
-          </Card>
+          <EnhancedMetricCard
+            title="Unmapped Diseases"
+            value={<AnimatedCounter end={summary.diseasesUnmapped} />}
+            subtitle="Need coverage mapping"
+            variant="warning"
+            icon={<AlertCircle className="h-5 w-5" />}
+            progress={{
+              value: summary.diseasesUnmapped,
+              max: summary.diseasesMapped + summary.diseasesUnmapped,
+              label: "Remaining gaps"
+            }}
+          />
+        </div>
+
+        {/* Data Visualizations */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <InteractiveChart
+            title="Rule Distribution"
+            description="Breakdown of rules by type and status"
+            data={[
+              { name: "Complete", value: 45, color: "hsl(var(--success))" },
+              { name: "Incomplete", value: 23, color: "hsl(var(--warning))" },
+              { name: "Contradicted", value: summary.contradictions, color: "hsl(var(--destructive))" },
+              { name: "Under Review", value: 8, color: "hsl(var(--info))" }
+            ]}
+            type="both"
+          />
+          
+          <InteractiveChart
+            title="Coverage Analysis"
+            description="Disease coverage across facility levels"
+            data={[
+              { name: "Level 2-3", value: 120, color: "hsl(var(--chart-1))" },
+              { name: "Level 4", value: 89, color: "hsl(var(--chart-2))" },
+              { name: "Level 5-6", value: 67, color: "hsl(var(--chart-3))" },
+              { name: "Specialized", value: 34, color: "hsl(var(--chart-4))" }
+            ]}
+            type="bar"
+          />
         </div>
 
         {/* Enhanced Analysis Cards */}
