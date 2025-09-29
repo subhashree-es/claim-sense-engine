@@ -19,7 +19,8 @@ import {
   Users,
   TrendingUp,
   Database,
-  AlertCircle
+  AlertCircle,
+  Upload
 } from "lucide-react";
 import { benefitRules, contradictions, diseaseMappings } from "@/data/benefitRulesData";
 import { FilterState, BenefitRule, UserComment, Task } from "@/types/benefitRules";
@@ -343,6 +344,28 @@ const BenefitRulesChecker = () => {
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Export CSV
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = '.csv,.xlsx,.pdf';
+                      input.onchange = (e) => {
+                        const file = (e.target as HTMLInputElement).files?.[0];
+                        if (file) {
+                          toast({
+                            title: "File uploaded",
+                            description: `${file.name} is being processed...`,
+                          });
+                        }
+                      };
+                      input.click();
+                    }}
+                    variant="default"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Rules
                   </Button>
                 </div>
               </CardHeader>
