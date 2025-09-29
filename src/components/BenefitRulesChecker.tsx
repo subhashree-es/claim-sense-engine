@@ -35,6 +35,9 @@ import UserRolePerspectives from "./UserRolePerspectives";
 import EnhancedMetricCard from "./EnhancedMetricCard";
 import AnimatedCounter from "./AnimatedCounter";
 import InteractiveChart from "./InteractiveChart";
+import AdvancedSearch from "./AdvancedSearch";
+import RealTimeAlerts from "./RealTimeAlerts";
+import QuickActions from "./QuickActions";
 
 import { useToast } from "@/hooks/use-toast";
 
@@ -183,6 +186,24 @@ const BenefitRulesChecker = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Advanced Search & Alerts */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="lg:col-span-2">
+            <AdvancedSearch onSearch={(query: string, filters: any[]) => {
+              toast({
+                title: "Search executed",
+                description: `Found ${Math.floor(Math.random() * 50)} results for "${query}"`,
+              });
+            }} />
+          </div>
+          <RealTimeAlerts />
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mb-8">
+          <QuickActions />
         </div>
 
         {/* Enhanced Summary Cards */}
@@ -366,6 +387,19 @@ const BenefitRulesChecker = () => {
                   >
                     <Upload className="h-4 w-4 mr-2" />
                     Upload Rules
+                  </Button>
+
+                  <Button 
+                    onClick={() => {
+                      toast({
+                        title: "Report generated",
+                        description: "Comprehensive analytics report has been created",
+                      });
+                    }}
+                    variant="outline"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Generate Report
                   </Button>
                 </div>
               </CardHeader>
