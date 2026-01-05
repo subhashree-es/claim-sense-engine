@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -38,6 +38,11 @@ import InteractiveChart from "./InteractiveChart";
 import AdvancedSearch from "./AdvancedSearch";
 import RealTimeAlerts from "./RealTimeAlerts";
 import QuickActions from "./QuickActions";
+import DarkModeToggle from "./DarkModeToggle";
+import KeyboardShortcuts from "./KeyboardShortcuts";
+import ExportOptions from "./ExportOptions";
+import ProgressTimeline from "./ProgressTimeline";
+import ComparisonView from "./ComparisonView";
 
 import { useToast } from "@/hooks/use-toast";
 
@@ -155,13 +160,57 @@ const BenefitRulesChecker = () => {
     window.URL.revokeObjectURL(url);
   };
 
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const handleToggleDarkMode = () => {
+    document.documentElement.classList.toggle("dark");
+  };
+
+  const handleFocusSearch = () => {
+    searchInputRef.current?.focus();
+  };
+
+  const handleUploadClick = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv,.xlsx,.pdf';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        toast({
+          title: "File uploaded",
+          description: `${file.name} is being processed...`,
+        });
+      }
+    };
+    input.click();
+  };
+
+  const handleExportClick = () => {
+    toast({
+      title: "Export ready",
+      description: "Use the Export button to configure export options",
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen bg-background p-6 transition-colors duration-300">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Enhanced Header */}
+        {/* Enhanced Header with Controls */}
         <div className="relative">
-          <div className="glass-card p-8 text-center space-y-4 border-t-4 border-t-primary">
-            <div className="space-y-2">
+          <div className="glass-card p-8 space-y-4 border-t-4 border-t-primary">
+            {/* Top Bar with Controls */}
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              <KeyboardShortcuts
+                onSearch={handleFocusSearch}
+                onExport={handleExportClick}
+                onUpload={handleUploadClick}
+                onToggleDarkMode={handleToggleDarkMode}
+              />
+              <DarkModeToggle />
+            </div>
+
+            <div className="text-center space-y-2">
               <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                 Benefit Rules Checker
               </h1>
@@ -300,6 +349,12 @@ const BenefitRulesChecker = () => {
           <PolicyRiskIndicators />
         </div>
 
+        {/* Progress Timeline & Version Comparison */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ProgressTimeline />
+          <ComparisonView />
+        </div>
+
         {/* User Perspectives */}
         <UserRolePerspectives />
 
@@ -359,13 +414,7 @@ const BenefitRulesChecker = () => {
                     </SelectContent>
                   </Select>
                   
-                  <Button 
-                    onClick={() => downloadCSV(filteredRules, "benefit-rules.csv")}
-                    variant="outline"
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Export CSV
-                  </Button>
+                  <ExportOptions data={filteredRules} filename="benefit-rules" />
                   
                   <Button 
                     onClick={() => {
